@@ -142,15 +142,15 @@ char *hash_table_resizing_test() {
     mu_assert(ht->capacity == 16, "Resized hash table did not double capacity");
 
     mu_assert(strcmp(hash_table_retrieve(ht, "resize-key-0"), "resize-val-0") == 0, "Resized hash table did not copy values correctly");
-    // mu_assert(strcmp(hash_table_retrieve(ht, "resize-key-1"), "resize-val-1") == 0, "Resized hash table did not copy values correctly");
-    // mu_assert(strcmp(hash_table_retrieve(ht, "resize-key-2"), "resize-val-2") == 0, "Resized hash table did not copy values correctly");
-    // mu_assert(strcmp(hash_table_retrieve(ht, "resize-key-3"), "resize-val-3") == 0, "Resized hash table did not copy values correctly");
-    // mu_assert(strcmp(hash_table_retrieve(ht, "resize-key-4"), "resize-val-4") == 0, "Resized hash table did not copy values correctly");
-    // mu_assert(strcmp(hash_table_retrieve(ht, "resize-key-5"), "resize-val-5") == 0, "Resized hash table did not copy values correctly");
-    // mu_assert(strcmp(hash_table_retrieve(ht, "resize-key-6"), "resize-val-6") == 0, "Resized hash table did not copy values correctly");
-    // mu_assert(strcmp(hash_table_retrieve(ht, "resize-key-7"), "resize-val-7") == 0, "Resized hash table did not copy values correctly");
-    // mu_assert(strcmp(hash_table_retrieve(ht, "resize-key-8"), "resize-val-8") == 0, "Resized hash table did not copy values correctly");
-    // mu_assert(strcmp(hash_table_retrieve(ht, "resize-key-9"), "resize-val-9") == 0, "Resized hash table did not copy values correctly");
+    mu_assert(strcmp(hash_table_retrieve(ht, "resize-key-1"), "resize-val-1") == 0, "Resized hash table did not copy values correctly");
+    mu_assert(strcmp(hash_table_retrieve(ht, "resize-key-2"), "resize-val-2") == 0, "Resized hash table did not copy values correctly");
+    mu_assert(strcmp(hash_table_retrieve(ht, "resize-key-3"), "resize-val-3") == 0, "Resized hash table did not copy values correctly");
+    mu_assert(strcmp(hash_table_retrieve(ht, "resize-key-4"), "resize-val-4") == 0, "Resized hash table did not copy values correctly");
+    mu_assert(strcmp(hash_table_retrieve(ht, "resize-key-5"), "resize-val-5") == 0, "Resized hash table did not copy values correctly");
+    mu_assert(strcmp(hash_table_retrieve(ht, "resize-key-6"), "resize-val-6") == 0, "Resized hash table did not copy values correctly");
+    mu_assert(strcmp(hash_table_retrieve(ht, "resize-key-7"), "resize-val-7") == 0, "Resized hash table did not copy values correctly");
+    mu_assert(strcmp(hash_table_retrieve(ht, "resize-key-8"), "resize-val-8") == 0, "Resized hash table did not copy values correctly");
+    mu_assert(strcmp(hash_table_retrieve(ht, "resize-key-9"), "resize-val-9") == 0, "Resized hash table did not copy values correctly");
 
     return NULL;
 }

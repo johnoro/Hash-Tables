@@ -131,7 +131,7 @@ void hash_table_remove(HashTable *ht, char *key)
   }
 
   if (!curr) {
-    perror("Remove failed");
+    perror("Key not found while trying to remove");
     return;
   }
   
