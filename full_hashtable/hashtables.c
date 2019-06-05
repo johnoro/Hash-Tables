@@ -73,7 +73,10 @@ unsigned int hash(char *str, int max)
  */
 HashTable *create_hash_table(int capacity)
 {
-  HashTable *ht;
+  HashTable *ht = malloc(sizeof(HashTable));
+
+  ht->capacity = capacity;
+  ht->storage = calloc(capacity, sizeof(LinkedPair*));
 
   return ht;
 }
@@ -85,11 +88,28 @@ HashTable *create_hash_table(int capacity)
   added to the corresponding LinkedPair list.
 
   Inserting values to the same index with existing keys can overwrite
-  the value in th existing LinkedPair list.
+  the value in the existing LinkedPair list.
  */
 void hash_table_insert(HashTable *ht, char *key, char *value)
 {
-
+  unsigned int index = hash(key, ht->capacity);
+  LinkedPair *pair = create_pair(key, value),
+    *curr = ht->storage[index],
+    *last = NULL;
+  
+  while (curr && strcmp(curr->key, key) != 0) {
+    last = curr;
+    curr = curr->next;
+  }
+  
+  if (curr && last) {
+    pair->next = curr->next;
+    destroy_pair(curr);
+    last->next = pair;
+  } else {
+    pair->next = ht->storage[index];
+    ht->storage[index] = pair;
+  }
 }
 
 /*
@@ -102,7 +122,24 @@ void hash_table_insert(HashTable *ht, char *key, char *value)
  */
 void hash_table_remove(HashTable *ht, char *key)
 {
+  unsigned int index = hash(key, ht->capacity);
+  LinkedPair *curr = ht->storage[index], *last = NULL;
+  
+  while (curr && strcmp(curr->key, key) != 0) {
+    last = curr;
+    curr = curr->next;
+  }
 
+  if (!curr) {
+    perror("Remove failed");
+    return;
+  }
+  
+  if (last)
+    last->next = curr->next;
+  else
+    ht->storage[index] = curr->next;
+  destroy_pair(curr);
 }
 
 /*
@@ -115,6 +152,13 @@ void hash_table_remove(HashTable *ht, char *key)
  */
 char *hash_table_retrieve(HashTable *ht, char *key)
 {
+  int index = hash(key, ht->capacity);
+  LinkedPair *curr = ht->storage[index];
+  while (curr) {
+    if (strcmp(curr->key, key) == 0)
+      return curr->value;
+    curr = curr->next;
+  }
   return NULL;
 }
 
@@ -125,7 +169,17 @@ char *hash_table_retrieve(HashTable *ht, char *key)
  */
 void destroy_hash_table(HashTable *ht)
 {
+  for (int i = 0; i < ht->capacity; i++) {
+    LinkedPair *curr = ht->storage[i], *next;
+    while (curr) {
+      next = curr->next;
+      destroy_pair(curr);
+      curr = next;
+    }
+  }
 
+  free(ht->storage);
+  free(ht);
 }
 
 /*
@@ -138,7 +192,17 @@ void destroy_hash_table(HashTable *ht)
  */
 HashTable *hash_table_resize(HashTable *ht)
 {
-  HashTable *new_ht;
+  HashTable *new_ht = create_hash_table(ht->capacity * 2);
+
+  for (int i = 0; i < ht->capacity; i++) {
+    LinkedPair *curr = ht->storage[i];
+    while (curr) {
+      hash_table_insert(new_ht, curr->key, curr->value);
+      curr = curr->next;
+    }
+  }
+
+  destroy_hash_table(ht);
 
   return new_ht;
 }
