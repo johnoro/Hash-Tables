@@ -155,22 +155,6 @@ HashTable *hash_table_shrink(HashTable *ht) {
 
   ht->resized = 1;
   return ht;
-
-  // HashTable *new_ht = create_hash_table(ht->capacity / 2);
-
-  // int len = ht->capacity/2;
-  // for (int i = 0; i < len; i++) {
-  //   LinkedPair *curr = ht->storage[i];
-  //   while (curr) {
-  //     hash_table_insert(new_ht, curr->key, curr->value);
-  //     curr = curr->next;
-  //   }
-  // }
-
-  // destroy_hash_table(ht);
-
-  // new_ht->resized = 1;
-  // return new_ht;
 }
 
 /*
