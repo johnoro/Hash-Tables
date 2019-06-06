@@ -137,9 +137,10 @@ char *hash_table_resizing_test() {
     hash_table_insert(ht, "resize-key-8", "resize-val-8");
     hash_table_insert(ht, "resize-key-9", "resize-val-9");
 
+    int prev_capacity = ht->capacity;
     ht = hash_table_resize(ht);
 
-    mu_assert(ht->capacity == 16, "Resized hash table did not double capacity");
+    mu_assert(ht->capacity == prev_capacity*2, "Resized hash table did not double capacity");
 
     mu_assert(strcmp(hash_table_retrieve(ht, "resize-key-0"), "resize-val-0") == 0, "Resized hash table did not copy values correctly");
     mu_assert(strcmp(hash_table_retrieve(ht, "resize-key-1"), "resize-val-1") == 0, "Resized hash table did not copy values correctly");

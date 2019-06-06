@@ -20,6 +20,8 @@ typedef struct LinkedPair {
  */
 typedef struct HashTable {
   int capacity;
+  int resized;
+  int num_used;
   LinkedPair **storage;
 } HashTable;
 
@@ -66,6 +68,13 @@ unsigned int hash(char *str, int max)
   return hash % max;
 }
 
+void init_hash_table(HashTable *ht, int capacity) {
+  ht->capacity = capacity;
+  ht->storage = calloc(capacity, sizeof(LinkedPair*));
+  ht->resized = 0;
+  ht->num_used = 0;
+}
+
 /*
   Fill this in.
 
@@ -75,10 +84,93 @@ HashTable *create_hash_table(int capacity)
 {
   HashTable *ht = malloc(sizeof(HashTable));
 
-  ht->capacity = capacity;
-  ht->storage = calloc(capacity, sizeof(LinkedPair*));
+  init_hash_table(ht, capacity);
 
   return ht;
+}
+
+/*
+  Fill this in.
+
+  Don't forget to free any malloc'ed memory!
+ */
+void destroy_hash_table(HashTable *ht)
+{
+  for (int i = 0; i < ht->capacity; i++) {
+    LinkedPair *curr = ht->storage[i], *next;
+    while (curr) {
+      next = curr->next;
+      destroy_pair(curr);
+      curr = next;
+    }
+  }
+
+  free(ht->storage);
+  free(ht);
+}
+
+void hash_table_insert(HashTable *ht, char *key, char *value);
+
+/*
+  Fill this in.
+
+  Should create a new hash table with double the capacity
+  of the original and copy all elements into the new hash table.
+
+  Don't forget to free any malloc'ed memory!
+ */
+HashTable *hash_table_resize(HashTable *ht)
+{
+  LinkedPair **old_storage = ht->storage;
+  int old_len = ht->capacity;
+
+  init_hash_table(ht, ht->capacity*2);
+
+  LinkedPair *curr;
+  for (int i = 0; i < old_len; i++) {
+    curr = old_storage[i];
+    while (curr) {
+      hash_table_insert(ht, curr->key, curr->value);
+      curr = curr->next;
+    }
+  }
+
+  ht->resized = 1;
+  return ht;
+}
+
+HashTable *hash_table_shrink(HashTable *ht) {
+  LinkedPair **old_storage = ht->storage;
+
+  init_hash_table(ht, ht->capacity/2);
+
+  LinkedPair *curr;
+  for (int i = 0; i < ht->capacity; i++) {
+    curr = old_storage[i];
+    while (curr) {
+      hash_table_insert(ht, curr->key, curr->value);
+      curr = curr->next;
+    }
+  }
+
+  ht->resized = 1;
+  return ht;
+
+  // HashTable *new_ht = create_hash_table(ht->capacity / 2);
+
+  // int len = ht->capacity/2;
+  // for (int i = 0; i < len; i++) {
+  //   LinkedPair *curr = ht->storage[i];
+  //   while (curr) {
+  //     hash_table_insert(new_ht, curr->key, curr->value);
+  //     curr = curr->next;
+  //   }
+  // }
+
+  // destroy_hash_table(ht);
+
+  // new_ht->resized = 1;
+  // return new_ht;
 }
 
 /*
@@ -96,7 +188,7 @@ void hash_table_insert(HashTable *ht, char *key, char *value)
   LinkedPair *pair = create_pair(key, value),
     *curr = ht->storage[index],
     *last = NULL;
-  
+
   while (curr && strcmp(curr->key, key) != 0) {
     last = curr;
     curr = curr->next;
@@ -107,8 +199,18 @@ void hash_table_insert(HashTable *ht, char *key, char *value)
     destroy_pair(curr);
     last->next = pair;
   } else {
+    if (curr == NULL)
+      ht->num_used++;
     pair->next = ht->storage[index];
     ht->storage[index] = pair;
+  }
+  
+  if (ht->capacity > 0) {
+    double load = (double) ht->num_used / ht->capacity;
+    if (load > 0.7)
+      hash_table_resize(ht);
+    else if (ht->resized && load < 0.2)
+      hash_table_shrink(ht);
   }
 }
 
@@ -160,51 +262,6 @@ char *hash_table_retrieve(HashTable *ht, char *key)
     curr = curr->next;
   }
   return NULL;
-}
-
-/*
-  Fill this in.
-
-  Don't forget to free any malloc'ed memory!
- */
-void destroy_hash_table(HashTable *ht)
-{
-  for (int i = 0; i < ht->capacity; i++) {
-    LinkedPair *curr = ht->storage[i], *next;
-    while (curr) {
-      next = curr->next;
-      destroy_pair(curr);
-      curr = next;
-    }
-  }
-
-  free(ht->storage);
-  free(ht);
-}
-
-/*
-  Fill this in.
-
-  Should create a new hash table with double the capacity
-  of the original and copy all elements into the new hash table.
-
-  Don't forget to free any malloc'ed memory!
- */
-HashTable *hash_table_resize(HashTable *ht)
-{
-  HashTable *new_ht = create_hash_table(ht->capacity * 2);
-
-  for (int i = 0; i < ht->capacity; i++) {
-    LinkedPair *curr = ht->storage[i];
-    while (curr) {
-      hash_table_insert(new_ht, curr->key, curr->value);
-      curr = curr->next;
-    }
-  }
-
-  destroy_hash_table(ht);
-
-  return new_ht;
 }
 
 

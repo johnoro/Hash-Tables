@@ -25,5 +25,6 @@ void destroy_hash_table(HashTable *ht);
 
 HashTable *hash_table_resize(HashTable *ht);
 
+HashTable *hash_table_shrink(HashTable *ht);
 
 #endif
