@@ -135,6 +135,8 @@ HashTable *hash_table_resize(HashTable *ht)
     }
   }
 
+  free(old_storage);
+
   ht->resized = 1;
   return ht;
 }
@@ -152,6 +154,8 @@ HashTable *hash_table_shrink(HashTable *ht) {
       curr = curr->next;
     }
   }
+
+  free(old_storage);
 
   ht->resized = 1;
   return ht;
