@@ -3,6 +3,7 @@ build
 */tests/hashtables_tests
 */tests/b_hashtables_tests
 *.o
+*.exe
 *.dSYM
 *.log
 

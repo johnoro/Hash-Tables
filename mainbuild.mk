@@ -2,7 +2,7 @@ SRC=$(wildcard *.c)
 EXE=$(subst .c,,$(SRC))
 
 $(EXE): $(SRC)
-	gcc -Wall -Wextra -g -o $@ $^
+	gcc -Wall -Wextra -g -o $@.exe $^
 
 test: tests
 
