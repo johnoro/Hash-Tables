@@ -126,7 +126,7 @@ HashTable *hash_table_resize(HashTable *ht)
 
   init_hash_table(ht, ht->capacity*2);
 
-  LinkedPair *curr;
+  LinkedPair *curr, *next;
   for (int i = 0; i < old_len; i++) {
     curr = old_storage[i];
     while (curr) {
@@ -135,6 +135,14 @@ HashTable *hash_table_resize(HashTable *ht)
     }
   }
 
+  for (int i = 0; i < old_len; i++) {
+    curr = old_storage[i];
+    while (curr) {
+      next = curr->next;
+      destroy_pair(curr);
+      curr = next;
+    }
+  }
   free(old_storage);
 
   ht->resized = 1;
@@ -143,10 +151,11 @@ HashTable *hash_table_resize(HashTable *ht)
 
 HashTable *hash_table_shrink(HashTable *ht) {
   LinkedPair **old_storage = ht->storage;
+  int old_len = ht->capacity;
 
   init_hash_table(ht, ht->capacity/2);
 
-  LinkedPair *curr;
+  LinkedPair *curr, *next;
   for (int i = 0; i < ht->capacity; i++) {
     curr = old_storage[i];
     while (curr) {
@@ -155,6 +164,14 @@ HashTable *hash_table_shrink(HashTable *ht) {
     }
   }
 
+  for (int i = 0; i < old_len; i++) {
+    curr = old_storage[i];
+    while (curr) {
+      next = curr->next;
+      destroy_pair(curr);
+      curr = next;
+    }
+  }
   free(old_storage);
 
   ht->resized = 1;
@@ -175,17 +192,17 @@ void hash_table_insert(HashTable *ht, char *key, char *value)
   unsigned int index = hash(key, ht->capacity);
   LinkedPair *pair = create_pair(key, value),
     *curr = ht->storage[index],
-    *last = NULL;
+    *prev = NULL;
 
   while (curr && strcmp(curr->key, key) != 0) {
-    last = curr;
+    prev = curr;
     curr = curr->next;
   }
   
-  if (curr && last) {
+  if (curr && prev) {
     pair->next = curr->next;
     destroy_pair(curr);
-    last->next = pair;
+    prev->next = pair;
   } else {
     if (curr == NULL)
       ht->num_used++;
@@ -197,8 +214,6 @@ void hash_table_insert(HashTable *ht, char *key, char *value)
     double load = (double) ht->num_used / ht->capacity;
     if (load > 0.7)
       hash_table_resize(ht);
-    else if (ht->resized && load < 0.2)
-      hash_table_shrink(ht);
   }
 }
 
@@ -213,10 +228,10 @@ void hash_table_insert(HashTable *ht, char *key, char *value)
 void hash_table_remove(HashTable *ht, char *key)
 {
   unsigned int index = hash(key, ht->capacity);
-  LinkedPair *curr = ht->storage[index], *last = NULL;
+  LinkedPair *curr = ht->storage[index], *prev = NULL;
   
   while (curr && strcmp(curr->key, key) != 0) {
-    last = curr;
+    prev = curr;
     curr = curr->next;
   }
 
@@ -225,11 +240,19 @@ void hash_table_remove(HashTable *ht, char *key)
     return;
   }
   
-  if (last)
-    last->next = curr->next;
+  if (prev)
+    prev->next = curr->next;
   else
     ht->storage[index] = curr->next;
+  
   destroy_pair(curr);
+  
+  if (ht->capacity > 0) {
+    double load = (double) ht->num_used / ht->capacity;
+    if (ht->resized && load < 0.2)
+      hash_table_shrink(ht);
+  }
+
 }
 
 /*
